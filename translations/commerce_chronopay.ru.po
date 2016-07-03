@@ -1,0 +1,157 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  commerce_chronopay.module: n/a
+#  commerce_chronopay.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2013-11-20 22:17+0400\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: commerce_chronopay.module:33;34;35
+msgid "ChronoPay"
+msgstr ""
+
+#: commerce_chronopay.module:36
+msgid "Integration with ChronoPay."
+msgstr "Интеграция с ChronoPay."
+
+#: commerce_chronopay.module:71
+msgid "Main settings"
+msgstr "Основные настройки"
+
+#: commerce_chronopay.module:79
+msgid "Site_id"
+msgstr ""
+
+#: commerce_chronopay.module:80
+msgid "This is the Site_id that ChronoPay sent you when you set up your account."
+msgstr "Site_id назначает ChronoPay при регистрации аккаунта."
+
+#: commerce_chronopay.module:88
+msgid "Shared_sec"
+msgstr ""
+
+#: commerce_chronopay.module:89
+msgid "This is the Shared_sec that ChronoPay sent you when you set up your account."
+msgstr "Shared_sec назначает ChronoPay при регистрации аккаунта."
+
+#: commerce_chronopay.module:96
+msgid "Chronopay Server IP"
+msgstr "IP сервера ChronoPay"
+
+#: commerce_chronopay.module:97
+msgid "IP address of the Chronppay payment server for security check."
+msgstr "IP адрес сервера приема платежей ChronoPay для проверки на безопасность"
+
+#: commerce_chronopay.module:106
+msgid "Product ID"
+msgstr ""
+
+#: commerce_chronopay.module:110
+msgid "<p>ChronoPay Product ID. This should be set to your product ID that has been set up in the ChronoPay client interface.</p><p>This is the ChronoPay product that all purchases will be processed against.  The cost will be changed depending on the grand total of the users cart.</p>"
+msgstr "<p>ChronoPay ID товара. Здесь должен быть указан код товара, который был создан клиентском интерфейсе ChronoPay. </p><p>Стоимость будет меняться в зависимости от общей суммы покупок, находящихся в корзине.</p>"
+
+#: commerce_chronopay.module:116
+msgid "Product Name"
+msgstr "Название товара"
+
+#: commerce_chronopay.module:120
+msgid "ChronoPay Название товара. Это необязательный параметр и обычно тут указывается название магазина. Эти данные отображаются на странице оплаты в системе Chronopay."
+msgstr ""
+
+#: commerce_chronopay.module:128
+msgid "Language"
+msgstr "Zpsr"
+
+#: commerce_chronopay.module:131
+msgid "The language that the ChronoPay secure processing page will be displayed in."
+msgstr "Язык, на котором выводится информация на странице оплаты в системе ChronoPay."
+
+#: commerce_chronopay.module:137
+msgid "ChronoPay checkout settings"
+msgstr "Настройки оформления заказа"
+
+#: commerce_chronopay.module:144
+msgid "Payment Completed message"
+msgstr "Сообщение при удачной оплате"
+
+#: commerce_chronopay.module:148
+msgid "Insert your own message that is displayed when a payment is completed using chronopay_callback"
+msgstr "Вставьте текст, который будет показан в качестве сообщения при успешном завершении оплаты"
+
+#: commerce_chronopay.module:153
+msgid "Order Declined message"
+msgstr "Сообщение при отклонении заказа"
+
+#: commerce_chronopay.module:157
+msgid "Insert your own message that is displayed when a payment is declined using chronopay_callback"
+msgstr "Вставьте текст, который будет показан в качестве сообщения при неудачном завершении оплаты"
+
+#: commerce_chronopay.module:162
+msgid "Server validation check failed message"
+msgstr "Сообщение при неудачной проверке системных данных"
+
+#: commerce_chronopay.module:166
+msgid "Вставьте текст, который будет показан в качестве сообщения при неудачной проверке данных сервером Chronopay, например при проверке на безопасность"
+msgstr ""
+
+#: commerce_chronopay.module:178;178
+msgid "VISA / MasterCard / MaestroCard"
+msgstr ""
+
+#: commerce_chronopay.module:179;262
+msgid "Pay via ChronoPay"
+msgstr "Оплата через ChronoPay"
+
+#: commerce_chronopay.module:197
+msgid "The ChronoPay gateway has not been correctly configured - see watchdog for details. Cannot proceed with payment"
+msgstr ""
+
+#: commerce_chronopay.module:285
+msgid "The order does not exist."
+msgstr "Этот заказ не сущетвует."
+
+#: commerce_chronopay.module:344;349
+msgid "The payment has pending."
+msgstr "Оплата в процессе"
+
+#: commerce_chronopay.module:354
+msgid "The payment has canceled."
+msgstr "Оплата отменена"
+
+#: commerce_chronopay.module:196;292;297
+msgid "commerce_chronopay"
+msgstr ""
+
+#: commerce_chronopay.module:196
+msgid "%method : Site_id and shared_sec have not been set in the payment settings. Cannot proceed with transaction"
+msgstr "%method : Site_id и shared_sec на настроены. Дальнейший процесс оплаты невозможен"
+
+#: commerce_chronopay.module:292;297
+msgid "Payment failed: An attempt to substitute ip address."
+msgstr "Платеж отклонен: попытка подмены ip адреса."
+
+#: commerce_chronopay.info:0
+msgid "Commerce Chronopay"
+msgstr ""
+
+#: commerce_chronopay.info:0
+msgid "Provides integration with the Chonopay payment gateway"
+msgstr "Обеспечивает интеграцию с платежной системой ChronoPay"
+
+#: commerce_chronopay.info:0
+msgid "Commerce - Payment"
+msgstr ""
+

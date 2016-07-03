@@ -1,0 +1,372 @@
+<?php
+
+/**
+ * @file
+ * Provides a ChronoPay API payment method for Drupal Commerce.
+ */
+
+
+// ChronoPay Server URL Transaction.
+define('CHRONOPAY_SERVER', 'https://payments.chronopay.com');
+
+/**
+ * Implements hook_menu().
+ */
+function commerce_chronopay_menu() {
+	$items['commerce/chronopay/response/%/%'] = array(
+		'page callback' => 'commerce_chronopay_response',
+		'page arguments' => array(3, 4),
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	);
+	return $items;
+}
+
+/**
+ * Implements hook_commerce_payment_method_info().
+ */
+function commerce_chronopay_commerce_payment_method_info() {
+	$payment_methods = array();
+
+	$payment_methods['chronopay'] = array(
+		'base' => 'commerce_chronopay',
+		'title' => t('ChronoPay'),
+		'short_title' => t('ChronoPay'),
+		'display_title' => t('ChronoPay'),
+		'description' => t('Integration with ChronoPay.'),
+		'terminal' => FALSE,
+		'offsite' => TRUE,
+		'offsite_autoredirect' => TRUE,
+		'active' => TRUE,
+	);
+	return $payment_methods;
+}
+
+/**
+ * Settings form for Chronopay payment method.
+ *
+ * Used to set merchant id and  password within Rules settings.
+ */
+function commerce_chronopay_settings_form($settings = NULL) {
+
+	$form = array();
+	$settings = (array) $settings + array(
+		'settings' => array(
+			'site_id' => '',
+			'shared_sec' => '',
+			'ip' => '159.255.220.140',
+			'product_id' => '00000-0000-0000',
+			'product_name' => '',
+			'language_code' => 'RU',
+		),
+		'checkout' => array(
+			'payment_complete' => '<h1>PAYMENT COMPLETED!</h1><p>ChronoPay has accepted your card and payment has been made. Thank you.</p>',
+			'payment_denied' => '<h1>PAYMENT Declined!</h1><p>ChronoPay has declined your payment. Thank you. Please contact us if you are having difficulties.</p>',
+			'server_fail' => '<h1>Sorry!</h1><p>We were unable to validate your request with the ChronoPay server. Please contact us if you are having difficulties.</p>',
+		),
+	);
+
+	$form['settings'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('Main settings'),
+		'#collapsible' => FALSE, 
+		'#collapsed' => FALSE,
+	);
+
+	//Site_id
+	$form['settings']['site_id'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Site_id'),
+		'#description' => t('This is the Site_id that ChronoPay sent you when you set up your account.'),
+		'#default_value' => $settings['settings']['site_id'],
+		'#required' => TRUE,
+	);
+	
+	//Shared_sec
+	$form['settings']['shared_sec'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Shared_sec'),
+		'#description' => t('This is the Shared_sec that ChronoPay sent you when you set up your account.'),
+		'#default_value' => $settings['settings']['shared_sec'],
+		'#required' => TRUE,
+	);
+	
+	$form['settings']['ip'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Chronopay Server IP'),
+		'#description' => t('IP address of the Chronppay payment server for security check.'),
+		'#default_value' => $settings['settings']['ip'],
+		'#required' => TRUE,
+	);
+	
+
+	// Product ID
+	$form['settings']['product_id'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Product ID'),
+		'#default_value' => $settings['settings']['product_id'],
+		'#size' => 20,
+		'#maxlength' => 255,
+		'#description' => t('<p>ChronoPay Product ID. This should be set to your product ID that has been set up in the ChronoPay client interface.</p><p>This is the ChronoPay product that all purchases will be processed against.  The cost will be changed depending on the grand total of the users cart.</p>'),
+	);
+
+	// Product Name
+	$form['settings']['product_name'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Product Name'),
+		'#default_value' => $settings['settings']['product_name'],
+		'#size' => 20,
+		'#maxlength' => 255,
+		'#description' => t('ChronoPay Product Name. This is not important and is usually set to the name of the web shop.  It is displayed on the ChronoPay secure processing page..'),
+	);
+
+
+	// Language Code (language)
+	$language_codes = array('EN' => 'English', 'ES' => 'Spanish', 'NL' => 'Dutch', 'RU' => 'Russian');
+	$form['settings']['language_code'] = array(
+		'#type' => 'select',
+		'#title' => t('Language'),
+		'#default_value' => $settings['settings']['language_code'],
+		'#options' => $language_codes,
+		'#description' => t('The language that the ChronoPay secure processing page will be displayed in.'),
+	);
+
+
+	$form['checkout'] = array(
+		'#type' => 'fieldset',
+		'#title' => t('ChronoPay checkout settings'),
+		'#collapsible' => FALSE, 
+		'#collapsed' => FALSE,
+	);
+
+	$form['checkout']['payment_complete'] = array(
+		'#type' => 'textarea', 
+		'#title' => t('Payment Completed message'), 
+		'#default_value' => $settings['checkout']['payment_complete'],
+		'#cols' => 60, 
+		'#rows' => 5, 
+		'#description' => t('Insert your own message that is displayed when a payment is completed using chronopay_callback'),
+	);
+
+	$form['checkout']['payment_denied'] = array(
+		'#type' => 'textarea', 
+		'#title' => t('Order Declined message'), 
+		'#default_value' => $settings['checkout']['payment_denied'],
+		'#cols' => 60, 
+		'#rows' => 5, 
+		'#description' => t('Insert your own message that is displayed when a payment is declined using chronopay_callback'),
+	);
+
+	$form['checkout']['server_fail'] = array(
+		'#type' => 'textarea', 
+		'#title' => t('Server validation check failed message'), 
+		'#default_value' => $settings['checkout']['server_fail'],
+		'#cols' => 60, 
+		'#rows' => 5, 
+		'#description' => t('Insert your own message that is displayed when the ChronoPay server validation check fails using chronopay_callback - a possible security breach'),
+	);
+
+	return $form;
+}
+
+/**
+ * Payment method callback: checkout form.
+ */
+function commerce_chronopay_submit_form($payment_method, $pane_values, $checkout_pane, $order) {
+
+	$form = array();
+	$text = theme('image', array('path' => drupal_get_path('module', 'commerce_chronopay') . '/commerce_chronopay.png', 'alt' => t('VISA / MasterCard / MaestroCard'), 'title' => t('VISA / MasterCard / MaestroCard'), 'attributes' => array('class' => 'cards')));
+	$text .= '<div class="acquiring-desc">' . t('Pay via ChronoPay') . '</div>';
+	$form['commerce_chronopay_information'] = array('#markup' => $text);
+
+	$form['dummy'] = array(
+		'#type' => 'hidden',
+		'#value' => 'dummy'
+	);
+
+	return $form;
+}
+
+/**
+ * Payment method callback: checkout form submission.
+ */
+function commerce_chronopay_submit_form_submit($payment_method, $pane_form, $pane_values, &$order, $charge) {
+	// Create request to send to ChronoPay.
+	if (!isset($payment_method['settings']['settings']['site_id']) && !isset($payment_method['settings']['settings']['shared_sec'])) {
+		watchdog('commerce_chronopay',	'%method : Site_id and shared_sec have not been set in the payment settings. Cannot proceed with transaction', WATCHDOG_ERROR);
+		drupal_set_message(t('The ChronoPay gateway has not been correctly configured - see watchdog for details. Cannot proceed with payment'), 'error');
+		return FALSE;
+	}
+		return TRUE;
+}
+
+/**
+ * Payment method callback: payment redirect form.
+ */
+function commerce_chronopay_redirect_form($form, &$form_state, $order, $payment_method) {
+	$order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+	$amount = $order_wrapper->commerce_order_total->amount->value();
+	$product_id = $payment_method['settings']['settings']['product_id'];
+	$shared_sec = $payment_method['settings']['settings']['shared_sec'];
+
+	$form['#action'] = CHRONOPAY_SERVER;
+
+	$form['product_id'] = array(
+		'#type' => 'hidden',
+		'#value' => $product_id,
+	);
+
+	$form['product_price'] = array(
+		'#type' => 'hidden',
+		'#value' => $amount / 100,
+	);
+
+	$form['sign'] = array(
+		'#type' => 'hidden',
+		'#value' => md5($product_id . '-' . $amount / 100  . '-' . $shared_sec),
+	);
+
+	$form['order_id'] = array(
+		'#type' => 'hidden',
+		'#value' => $order->order_id,
+	);
+
+	$form['cb_url'] = array(
+		'#type' => 'hidden',
+		'#value' => url($GLOBALS['base_url'] . '/commerce/chronopay/response/' . $order->order_id . '/callback'),
+	);
+
+	$form['cb_type'] = array(
+		'#type' => 'hidden',
+		'#value' => 'P',
+	);
+	
+	$form['success_url'] = array(
+		'#type' => 'hidden',
+		'#value' => url($GLOBALS['base_url'] . '/commerce/chronopay/response/' . $order->order_id . '/success'),
+	);
+	
+	
+	$form['decline_url'] = array(
+		'#type' => 'hidden',
+		'#value' => url($GLOBALS['base_url'] . '/commerce/chronopay/response/' . $order->order_id . '/decline'),
+	);
+	
+	$form['language'] = array(
+		'#type' => 'hidden',
+		'#value' => $payment_method['settings']['settings']['language_code'],
+	);
+
+	$form['country'] = array(
+		'#type' => 'hidden',
+		'#value' => 'RUS',
+	);
+	
+	$form['email'] = array(
+		'#type' => 'hidden',
+		'#value' => $order->mail,
+	);
+
+	$form['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Pay via ChronoPay'),
+	);
+	
+	return $form;
+}
+
+/**
+ * Menu callback.
+ */
+function commerce_chronopay_response($order_id, $response) {
+//	$order_id = isset($_POST['order_id']) ? $_POST['order_id'] : '';
+	$order = commerce_order_load($order_id);
+	$payment_method = commerce_payment_method_instance_load($order->data['payment_method']);
+	$sign = isset($_POST['sign']) ? $_POST['sign'] : '';
+	$shared_sec = $payment_method['settings']['settings']['shared_sec'];
+	$customer_id = isset($_POST['customer_id']) ? $_POST['customer_id'] : '';
+	$transaction_id = isset($_POST['transaction_id']) ? $_POST['transaction_id'] : '';
+	$transaction_type = isset($_POST['transaction_type']) ? $_POST['transaction_type'] : '';
+	$total = isset($_POST['total']) ? $_POST['total'] : '';
+
+	//	drupal_set_message('<pre>' . print_r($_POST, TRUE) . '</pre>');
+
+	if (!$order) {
+		return t('The order does not exist.');
+	}
+
+	switch ($response) {
+		case 'callback':
+			//Check remote IP
+			if ($_SERVER['REMOTE_ADDR'] != $payment_method['settings']['settings']['ip']) {
+				watchdog('commerce_chronopay', 'Payment failed: An attempt to substitute ip address.', array(), WATCHDOG_WARNING);
+				return;
+			}
+			//Check hash
+			if ($sign != md5($shared_sec . $customer_id . $transaction_id . $transaction_type . $total)) {
+				watchdog('commerce_chronopay', 'Payment failed: An attempt to substitute ip address.', array(), WATCHDOG_WARNING);
+				return;
+			}
+			//Process the transaction
+			commerce_chronopay_transaction($order, '3');
+            break;
+		case 'success':
+			//Process the transaction
+			commerce_chronopay_transaction($order, '1');
+			commerce_payment_redirect_pane_next_page($order);
+			drupal_set_message($payment_method['settings']['checkout']['payment_complete'], 'status');
+			drupal_goto(commerce_checkout_order_uri($order));
+            break;
+		case 'decline':
+			$back_url = url($GLOBALS['base_url'] . '/checkout/' . $order->order_id);
+			drupal_set_message($payment_method['settings']['checkout']['payment_denied'], 'error');
+			commerce_payment_redirect_pane_previous_page($order);
+			drupal_goto($back_url);
+            break;
+	}
+}
+
+
+/**
+ * Create a transaction and associate it with an order.
+ */
+ 
+function commerce_chronopay_transaction($order, $status_code) {
+
+	$order_wrapper = entity_metadata_wrapper('commerce_order', $order);
+
+	// If this is authorization for which we've already
+	// created a transaction...
+	$transactions = commerce_payment_transaction_load_multiple(array(), array('order_id' => $order->order_id));
+	if (!empty($transactions)) {
+		// Load transaction and update that with the capture values.
+		$transaction = reset($transactions);
+	}
+	else {
+		// Create a new payment transaction for the order.
+		$transaction = commerce_payment_transaction_new('commerce_chronopay', $order->order_id);
+		$transaction->instance_id = $order->data['payment_method'];
+	}
+	$transaction->amount = $order_wrapper->commerce_order_total->amount->value();
+	$transaction->currency_code = $order_wrapper->commerce_order_total->currency_code->value();
+
+	// Set a status for the payment - one of COMMERCE_PAYMENT_STATUS_SUCCESS, COMMERCE_PAYMENT_STATUS_PENDING or COMMERCE_PAYMENT_STATUS_FAILURE.
+	switch ($status_code) {
+		case '1':
+			$transaction->status = COMMERCE_PAYMENT_STATUS_PENDING;
+			$transaction->message = t('The payment has pending.');
+//			commerce_order_status_update($order, 'checkout_payment');
+			break;
+		case '3':
+			$transaction->status = COMMERCE_PAYMENT_STATUS_SUCCESS;
+			$transaction->message = t('The payment has pending.');
+			commerce_order_status_update($order, 'checkout_complete');			
+			break;
+		case '2':
+			$transaction->status = COMMERCE_PAYMENT_STATUS_FAILURE;
+			$transaction->message = t('The payment has canceled.');
+//			commerce_order_status_update($order, 'canceled');
+			break;
+	}
+	commerce_payment_transaction_save($transaction);
+}
